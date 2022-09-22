@@ -26,6 +26,11 @@ class Issue extends Element
     /**
      * @var int|null Owner (User) of the issue
      */
+    public ?int $creatorId = null;
+
+    /**
+     * @var int|null Owner (User) of the issue
+     */
     public ?int $ownerId = null;
 
     /**
