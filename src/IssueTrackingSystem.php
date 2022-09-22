@@ -4,18 +4,20 @@ namespace codemonauts\its;
 
 use codemonauts\its\elements\Issue;
 use codemonauts\its\models\Settings;
+use codemonauts\its\services\Issues;
 use Craft;
 use craft\base\Plugin;
-use craft\events\ConfigEvent;
 use craft\events\RegisterComponentTypesEvent;
-use craft\helpers\Json;
+use craft\events\RegisterUrlRulesEvent;
 use craft\services\Elements;
 use craft\services\ProjectConfig;
+use craft\web\Controller;
+use craft\web\UrlManager;
 use yii\base\Event;
+use yii\web\Response;
 
 /**
  * Class IssueTrackingSystem
- *
  */
 class IssueTrackingSystem extends Plugin
 {
@@ -50,14 +52,21 @@ class IssueTrackingSystem extends Plugin
 
         self::$settings = $this->getSettings();
 
+        $this->setComponents([
+            'issues' => Issues::class,
+        ]);
+
         Event::on(Elements::class, Elements::EVENT_REGISTER_ELEMENT_TYPES, function(RegisterComponentTypesEvent $event) {
             $event->types[] = Issue::class;
         });
 
-        Craft::$app->projectConfig
-            ->onAdd(ProjectConfig::PATH_PLUGINS . '.' . $this->handle . '.issueFieldLayout', [$this, 'handleChangedFieldLayout'])
-            ->onUpdate(ProjectConfig::PATH_PLUGINS . '.' . $this->handle . '.issueFieldLayout', [$this, 'handleChangedFieldLayout'])
-            ->onRemove(ProjectConfig::PATH_PLUGINS . '.' . $this->handle . '.issueFieldLayout', [$this, 'handleRemovedFieldLayout']);
+        // Register CP routes
+        Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function (RegisterUrlRulesEvent $event) {
+            $event->rules['settings/plugins/its/issuetypes'] = 'its/issuetype/index';
+            $event->rules['settings/plugins/its/issuetype/new'] = 'its/issuetype/edit';
+            $event->rules['settings/plugins/its/issuetype/delete'] = 'its/issuetype/delete';
+            $event->rules['settings/plugins/its/issuetype/<id:\d+>'] = 'its/issuetype/edit';
+        });
     }
 
     /**
@@ -73,7 +82,7 @@ class IssueTrackingSystem extends Plugin
      */
     protected function settingsHtml(): ?string
     {
-        return Craft::$app->getView()->renderTemplate('its/settings', [
+        return Craft::$app->getView()->renderTemplate('its/settings/_settings', [
                 'settings' => $this->getSettings()
             ]
         );
@@ -82,59 +91,26 @@ class IssueTrackingSystem extends Plugin
     /**
      * @inheritDoc
      */
-    public function beforeSaveSettings(): bool
+    public function getSettingsResponse(): Response
     {
-        $settings = Craft::$app->getRequest()->getBodyParam('settings');
-        $config = Json::decode($settings['fieldLayout']);
+        $settingsHtml = Craft::$app->getView()->namespaceInputs(function() {
+            return (string)$this->settingsHtml();
+        }, 'settings');
 
-        $fieldLayout = Craft::$app->fields->createLayout($config);
-        $fieldLayout->type = Issue::class;
-
-        Craft::$app->fields->saveLayout($fieldLayout);
-
-        IssueTrackingSystem::$settings->fieldLayoutConfig =
-
-        return true;
+        return Craft::$app->controller->renderTemplate('its/settings/index', [
+            'plugin' => $this,
+            'settingsHtml' => $settingsHtml,
+        ]);
     }
 
-    public function handleChangedFieldLayout(ConfigEvent $event)
+    /**
+     * Returns the issues component.
+     *
+     * @return Issues
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getIssues(): Issues
     {
-        // Get the UID that was matched in the config path
-        $uid = $event->tokenMatches[0];
-
-        // Does this product type exist?
-        $id = (new Query())
-            ->select(['id'])
-            ->from('{{%producttypes}}')
-            ->where(['uid' => $uid])
-            ->scalar();
-
-        $isNew = empty($id);
-
-        // Insert or update its row
-        if ($isNew) {
-            Craft::$app->db->createCommand()
-                ->insert('{{%producttypes}}', [
-                    'name' => $event->newValue['name'],
-                    // ...
-                ])
-                ->execute();
-        } else {
-            Craft::$app->db->createCommand()
-                ->update('{{%producttypes}}', [
-                    'name' => $event->newValue['name'],
-                    // ...
-                ], ['id' => $id])
-                ->execute();
-        }
-
-        // Fire an 'afterSaveProductType' event?
-        if ($this->hasEventHandlers('afterSaveProductType')) {
-            $productType = $this->getProductTypeByUid($uid);
-            $this->trigger('afterSaveProductType', new ProducTypeEvent([
-                'productType' => $productType,
-                'isNew' => $isNew,
-            ]));
-        }
+        return $this->get('issues');
     }
 }

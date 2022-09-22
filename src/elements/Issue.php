@@ -1,4 +1,5 @@
 <?php
+
 namespace codemonauts\its\elements;
 
 use codemonauts\its\elements\db\IssueQuery;
@@ -16,6 +17,11 @@ class Issue extends Element
      * @var string|null Staus of the issue
      */
     public ?string $status = null;
+
+    /**
+     * @var bool Whether the issue was deleted along with its issue type
+     */
+    public bool $deletedWithIssueType = false;
 
     /**
      * @var int|null Owner (User) of the issue
@@ -80,7 +86,7 @@ class Issue extends Element
 
     /**
      * @inheritdoc
-     * @return \codemonauts\its\elements\db\IssueQuery The newly created [[CategoryQuery]] instance.
+     * @return \codemonauts\its\elements\db\IssueQuery
      */
     public static function find(): IssueQuery
     {

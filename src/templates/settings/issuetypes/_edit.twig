@@ -1,0 +1,61 @@
+{% extends "_layouts/cp" %}
+
+{% import "_includes/forms" as forms %}
+
+{% set fullPageForm = true %}
+{% set formActions = [
+    {
+        label: 'Save and continue editing'|t('app'),
+        redirect: "its/settings/issuetype/{id}"|hash,
+        shortcut: true,
+        retainScroll: true,
+    },
+] %}
+
+{% set crumbs = [
+    { label: "Settings"|t('app'), url: url('settings') },
+    { label: "Plugins"|t('app'), url: url('settings/plugins') },
+    { label: plugin.name|t('its'), url: url('settings/plugins/' ~ plugin.handle) },
+    { label: "Issue Types"|t('its'), url: url('settings/plugins/' ~ plugin.handle ~ '/issuetypes') }
+] %}
+
+{% block content %}
+    {{ actionInput('its/issuetype/save') }}
+    {{ redirectInput('its/settings/issuetypes') }}
+    {% if issueType.id %}{{ hiddenInput('issueTypeId', issueType.id) }}{% endif %}
+
+    {{ forms.textField({
+        first: true,
+        label: "Name"|t('its'),
+        instructions: "What this issue type will be called in the control panel."|t('its'),
+        id: 'name',
+        name: 'name',
+        value: issueType.name,
+        errors: issueType.getErrors('name'),
+        autofocus: true,
+        required: true
+    }) }}
+
+    {{ forms.textField({
+        label: "Handle"|t('its'),
+        instructions: "How you’ll refer to this issue type in the templates and when a new issue is created programmatically."|t('app'),
+        id: 'handle',
+        name: 'handle',
+        class: 'code',
+        autocorrect: false,
+        autocapitalize: false,
+        value: issueType.handle,
+        errors: issueType.getErrors('handle'),
+        required: true
+    }) }}
+
+    <hr>
+
+    {{ forms.fieldLayoutDesignerField({
+        fieldLayout: issueType.getFieldLayout(),
+    }) }}
+{% endblock %}
+
+{% if not issueType.handle %}
+    {% js "new Craft.HandleGenerator('#name', '#handle');" %}
+{% endif %}

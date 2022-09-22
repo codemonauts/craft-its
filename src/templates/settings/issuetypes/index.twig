@@ -1,0 +1,59 @@
+{% requireAdmin %}
+
+{% extends "_layouts/cp" %}
+
+{% set selectedTab = 'issueTypes' %}
+{% set title = plugin.name %}
+{% set docTitle = title|t('its') %}
+
+{% set crumbs = [
+    { label: "Settings"|t('app'), url: url('settings') },
+    { label: "Plugins"|t('app'), url: url('settings/plugins') }
+] %}
+
+{% set tabs = {
+    settings: {
+        label: 'Settings'|t('app'),
+        url: url("settings/plugins/#{plugin.handle}"),
+    },
+    issueTypes: {
+        label: 'Issue Types'|t('app'),
+        url: url("settings/plugins/#{plugin.handle}/issuetypes"),
+    },
+} %}
+
+{% do view.registerAssetBundle('craft\\web\\assets\\admintable\\AdminTableAsset') %}
+
+{% block actionButton %}
+    <a href="{{ url('its/settings/issuetype/new') }}" class="btn submit add icon">{{ "New issue type"|t('app') }}</a>
+{% endblock %}
+
+{% block content %}
+    <div id="issuetypes-vue-admin-table"></div>
+{% endblock %}
+
+{% set tableData = [] %}
+{% for issueType in issueTypes %}
+    {% set tableData = tableData|merge([{
+        id: issueType.id,
+        title: issueType.name,
+        url: url('settings/plugins/' ~ plugin.handle ~ '/issuetype/' ~ issueType.id),
+        name: issueType.name|e,
+        handle: issueType.handle,
+    }]) %}
+{% endfor %}
+
+{% js %}
+    var columns = [
+    { name: '__slot:title', title: Craft.t('its', 'Name') },
+    { name: '__slot:handle', title: Craft.t('its', 'Handle') },
+    ];
+
+    new Craft.VueAdminTable({
+    fullPane: false,
+    columns: columns,
+    container: '#issuetypes-vue-admin-table',
+    tableData: {{ tableData|json_encode|raw }},
+    deleteAction: 'its/settings/issuetype/delete',
+    });
+{% endjs %}

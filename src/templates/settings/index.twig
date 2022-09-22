@@ -1,0 +1,29 @@
+{% requireAdmin %}
+
+{% extends "_layouts/cp" %}
+{% set title = plugin.name %}
+{% set docTitle = title|t('its') %}
+{% set fullPageForm = true %}
+
+{% set crumbs = [
+    { label: "Settings"|t('app'), url: url('settings') },
+    { label: "Plugins"|t('app'), url: url('settings/plugins') }
+] %}
+
+{% set tabs = {
+    settings: {
+        label: 'Settings'|t('app'),
+        url: url("settings/plugins/#{plugin.handle}"),
+    },
+    issueTypes: {
+        label: 'Issue Types'|t('app'),
+        url: url("settings/plugins/#{plugin.handle}/issuetypes"),
+    },
+} %}
+
+{% block content %}
+    {{ actionInput('plugins/save-plugin-settings') }}
+    {{ hiddenInput('pluginHandle', plugin.handle) }}
+    {{ redirectInput('settings') }}
+    {{ settingsHtml|raw }}
+{% endblock %}
