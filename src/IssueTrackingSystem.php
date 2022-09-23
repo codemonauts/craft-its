@@ -3,15 +3,16 @@
 namespace codemonauts\its;
 
 use codemonauts\its\elements\Issue;
+use codemonauts\its\fieldlayoutelements\SubjectField;
 use codemonauts\its\models\Settings;
 use codemonauts\its\services\Issues;
 use Craft;
 use craft\base\Plugin;
+use craft\events\DefineFieldLayoutFieldsEvent;
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterUrlRulesEvent;
+use craft\models\FieldLayout;
 use craft\services\Elements;
-use craft\services\ProjectConfig;
-use craft\web\Controller;
 use craft\web\UrlManager;
 use yii\base\Event;
 use yii\web\Response;
@@ -56,7 +57,7 @@ class IssueTrackingSystem extends Plugin
             'issues' => Issues::class,
         ]);
 
-        Event::on(Elements::class, Elements::EVENT_REGISTER_ELEMENT_TYPES, function(RegisterComponentTypesEvent $event) {
+        Event::on(Elements::class, Elements::EVENT_REGISTER_ELEMENT_TYPES, function (RegisterComponentTypesEvent $event) {
             $event->types[] = Issue::class;
         });
 
@@ -66,6 +67,21 @@ class IssueTrackingSystem extends Plugin
             $event->rules['settings/plugins/its/issuetype/new'] = 'its/issuetype/edit';
             $event->rules['settings/plugins/its/issuetype/delete'] = 'its/issuetype/delete';
             $event->rules['settings/plugins/its/issuetype/<id:\d+>'] = 'its/issuetype/edit';
+
+            $event->rules['its/issue/new'] = 'its/issue/create';
+            $event->rules['its/issue/<elementId:\d+>'] = 'elements/edit';
+        });
+
+        // Register field layout
+        Event::on(FieldLayout::class, FieldLayout::EVENT_DEFINE_NATIVE_FIELDS, function (DefineFieldLayoutFieldsEvent $event) {
+            /**
+             * @var FieldLayout $fieldLayout
+             */
+            $fieldLayout = $event->sender;
+
+            if ($fieldLayout->type === Issue::class) {
+                $event->fields[] = SubjectField::class;
+            }
         });
     }
 
@@ -83,7 +99,7 @@ class IssueTrackingSystem extends Plugin
     protected function settingsHtml(): ?string
     {
         return Craft::$app->getView()->renderTemplate('its/settings/_settings', [
-                'settings' => $this->getSettings()
+                'settings' => $this->getSettings(),
             ]
         );
     }
@@ -93,7 +109,7 @@ class IssueTrackingSystem extends Plugin
      */
     public function getSettingsResponse(): Response
     {
-        $settingsHtml = Craft::$app->getView()->namespaceInputs(function() {
+        $settingsHtml = Craft::$app->getView()->namespaceInputs(function () {
             return (string)$this->settingsHtml();
         }, 'settings');
 
@@ -101,6 +117,24 @@ class IssueTrackingSystem extends Plugin
             'plugin' => $this,
             'settingsHtml' => $settingsHtml,
         ]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCpNavItem(): ?array
+    {
+        $navItem = parent::getCpNavItem();
+        $subNavs = [];
+
+        $subNavs['issues'] = [
+            'url' => $this->handle . '/issues',
+            'label' => Craft::t('its', 'Issues'),
+        ];
+
+        $navItem['subnav'] = $subNavs;
+
+        return $navItem;
     }
 
     /**

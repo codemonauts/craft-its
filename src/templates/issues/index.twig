@@ -1,0 +1,9 @@
+{% extends "_layouts/elementindex" %}
+{% set title = "Issues" %}
+{% set elementType = 'codemonauts\\its\\elements\\Issue' %}
+
+{% block actionButton %}
+    <div class="buttons">
+        <a href="{{ url('its/issue/new') }}" class="btn submit add icon">{{ 'Add Issue'|t('its') }}</a>
+    </div>
+{% endblock %}

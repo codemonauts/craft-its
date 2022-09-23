@@ -14,18 +14,18 @@
 {% set tabs = {
     settings: {
         label: 'Settings'|t('app'),
-        url: url("settings/plugins/#{plugin.handle}"),
+        url: url("settings/plugins/its"),
     },
     issueTypes: {
         label: 'Issue Types'|t('app'),
-        url: url("settings/plugins/#{plugin.handle}/issuetypes"),
+        url: url("settings/plugins/its/issuetypes"),
     },
 } %}
 
 {% do view.registerAssetBundle('craft\\web\\assets\\admintable\\AdminTableAsset') %}
 
 {% block actionButton %}
-    <a href="{{ url('its/settings/issuetype/new') }}" class="btn submit add icon">{{ "New issue type"|t('app') }}</a>
+    <a href="{{ url('settings/plugins/its/issuetype/new') }}" class="btn submit add icon">{{ "New issue type"|t('app') }}</a>
 {% endblock %}
 
 {% block content %}

@@ -6,7 +6,7 @@
 {% set formActions = [
     {
         label: 'Save and continue editing'|t('app'),
-        redirect: "its/settings/issuetype/{id}"|hash,
+        redirect: "settings/plugins/its/issuetype/{id}"|hash,
         shortcut: true,
         retainScroll: true,
     },
@@ -21,7 +21,7 @@
 
 {% block content %}
     {{ actionInput('its/issuetype/save') }}
-    {{ redirectInput('its/settings/issuetypes') }}
+    {{ redirectInput('settings/plugins/its/issuetypes') }}
     {% if issueType.id %}{{ hiddenInput('issueTypeId', issueType.id) }}{% endif %}
 
     {{ forms.textField({

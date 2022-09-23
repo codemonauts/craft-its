@@ -12,8 +12,8 @@ class Install extends Migration
         $this->dropTableIfExists('{{%its_issues}}');
         $this->createTable('{{%its_issues}}', [
             'id' => $this->integer()->notNull(),
-            'subject' => $this->string()->notNull(),
-            'status' => $this->string(20)->null(),
+            'subject' => $this->string(),
+            'status' => $this->string(20),
             'typeId' => $this->integer()->notNull(),
             'deletedWithIssueType' => $this->boolean()->null(),
             'creatorId' => $this->integer()->null(),
