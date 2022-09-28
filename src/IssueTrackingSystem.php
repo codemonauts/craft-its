@@ -11,6 +11,7 @@ use craft\base\Plugin;
 use craft\events\DefineFieldLayoutFieldsEvent;
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterUrlRulesEvent;
+use craft\helpers\UrlHelper;
 use craft\models\FieldLayout;
 use craft\services\Elements;
 use craft\web\UrlManager;
@@ -135,6 +136,22 @@ class IssueTrackingSystem extends Plugin
         $navItem['subnav'] = $subNavs;
 
         return $navItem;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function afterInstall(): void
+    {
+        parent::afterInstall();
+
+        if (Craft::$app->getRequest()->getIsConsoleRequest()) {
+            return;
+        }
+
+        Craft::$app->getResponse()->redirect(
+            UrlHelper::cpUrl('settings/plugins/its')
+        )->send();
     }
 
     /**
