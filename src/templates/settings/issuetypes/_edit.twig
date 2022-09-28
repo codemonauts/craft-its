@@ -15,8 +15,8 @@
 {% set crumbs = [
     { label: "Settings"|t('app'), url: url('settings') },
     { label: "Plugins"|t('app'), url: url('settings/plugins') },
-    { label: plugin.name|t('its'), url: url('settings/plugins/' ~ plugin.handle) },
-    { label: "Issue Types"|t('its'), url: url('settings/plugins/' ~ plugin.handle ~ '/issuetypes') }
+    { label: plugin.name|t('its'), url: url('settings/plugins/its') },
+    { label: "Issue Types"|t('its'), url: url('settings/plugins/its/issuetypes') }
 ] %}
 
 {% block content %}
@@ -38,7 +38,7 @@
 
     {{ forms.textField({
         label: "Handle"|t('its'),
-        instructions: "How you’ll refer to this issue type in the templates and when a new issue is created programmatically."|t('app'),
+        instructions: "How you’ll refer to this issue type in the templates and when a new issue is created programmatically."|t('its'),
         id: 'handle',
         name: 'handle',
         class: 'code',

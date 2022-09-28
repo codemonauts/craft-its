@@ -17,7 +17,7 @@
         url: url("settings/plugins/its"),
     },
     issueTypes: {
-        label: 'Issue Types'|t('app'),
+        label: 'Issue Types'|t('its'),
         url: url("settings/plugins/its/issuetypes"),
     },
 } %}
@@ -25,7 +25,7 @@
 {% do view.registerAssetBundle('craft\\web\\assets\\admintable\\AdminTableAsset') %}
 
 {% block actionButton %}
-    <a href="{{ url('settings/plugins/its/issuetype/new') }}" class="btn submit add icon">{{ "New issue type"|t('app') }}</a>
+    <a href="{{ url('settings/plugins/its/issuetype/new') }}" class="btn submit add icon">{{ "New issue type"|t('its') }}</a>
 {% endblock %}
 
 {% block content %}
@@ -37,7 +37,7 @@
     {% set tableData = tableData|merge([{
         id: issueType.id,
         title: issueType.name,
-        url: url('settings/plugins/' ~ plugin.handle ~ '/issuetype/' ~ issueType.id),
+        url: url('settings/plugins/its/issuetype/' ~ issueType.id),
         name: issueType.name|e,
         handle: issueType.handle,
     }]) %}
