@@ -10,6 +10,7 @@ use Craft;
 use craft\base\Element;
 use craft\elements\User;
 use craft\helpers\Cp;
+use craft\helpers\DateTimeHelper;
 use craft\helpers\Html;
 use craft\helpers\UrlHelper;
 use craft\models\FieldLayout;
@@ -373,6 +374,35 @@ class Issue extends Element
     }
 
     /**
+     * @inheritDoc
+     */
+    public static function defineTableAttributes(): array
+    {
+        return [
+            'subject' => Craft::t('its', 'Subject'),
+            'creator' => Craft::t('its', 'Creator'),
+            'owner' => Craft::t('its', 'Owner'),
+            'dateCreated' => Craft::t('its', 'Date Created'),
+            'dateUpdated' => Craft::t('its', 'Date Updated'),
+            'durationUpdated' => Craft::t('its', 'Last Update'),
+        ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function defineDefaultTableAttributes(string $source): array
+    {
+        return [
+            'subject',
+            'creator',
+            'owner',
+            'dateCreated',
+            'durationUpdated',
+        ];
+    }
+
+    /**
      * @inheritdoc
      */
     protected function tableAttributeHtml(string $attribute): string
@@ -380,11 +410,15 @@ class Issue extends Element
         switch ($attribute) {
             case 'owner':
                 $owner = $this->getOwner();
-                return $owner ? Cp::elementHtml($owner) : '';
+                $button = Html::a(Craft::t('its', 'Take'), UrlHelper::cpUrl('its/issue/take/' . $this->id), ['class' => 'btn small']);
+                return $owner ? Cp::elementHtml($owner) : $button;
 
             case 'creator':
                 $creator = $this->getCreator();
                 return $creator ? Cp::elementHtml($creator) : '';
+
+            case 'durationUpdated':
+                return DateTimeHelper::humanDuration($this->dateUpdated?->diff(DateTimeHelper::now()));
 
             case 'type':
                 try {
