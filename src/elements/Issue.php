@@ -106,6 +106,14 @@ class Issue extends Element
     /**
      * @inheritdoc
      */
+    public static function isLocalized(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public static function trackChanges(): bool
     {
         return true;
@@ -390,6 +398,27 @@ class Issue extends Element
     }
 
     /**
+     * @inheritDoc
+     */
+    protected static function defineFieldLayouts(string $source): array
+    {
+        if ($source === '*') {
+            $issueTypes = IssueTrackingSystem::$plugin->getIssues()->getAllIssueTypes();
+        } else {
+            preg_match('/^type:(.+)$/', $source, $matches) &&
+            $issueType = IssueTrackingSystem::$plugin->getIssues()->getIssueTypeByUid($matches[1]);
+            $issueTypes = [$issueType];
+        }
+
+        $fieldLayouts = [];
+        foreach ($issueTypes as $issueType) {
+            $fieldLayouts[] = $issueType->getFieldLayout();
+        }
+
+        return $fieldLayouts;
+    }
+
+    /**
      * @inheritdoc
      */
     public function beforeValidate(): bool
@@ -435,6 +464,19 @@ class Issue extends Element
     public function getPostEditUrl(): ?string
     {
         return UrlHelper::cpUrl("its/issues");
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function defineRules(): array
+    {
+        $rules = parent::defineRules();
+
+        $rules[] = [['subject'], 'required', 'on' => self::SCENARIO_LIVE];
+        $rules[] = [['typeId'], 'integer'];
+
+        return $rules;
     }
 
     /**

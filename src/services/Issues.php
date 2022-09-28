@@ -50,6 +50,27 @@ class Issues extends Component
         return new IssueType($issueData);
     }
 
+    public function getIssueTypeByUid(string $uid): IssueType
+    {
+        $issueData = (new Query())
+            ->select([
+                'id',
+                'name',
+                'handle',
+                'fieldLayoutId',
+                'uid',
+            ])
+            ->from(['{{%its_issuetypes}}'])
+            ->where(['dateDeleted' => null, 'uid' => $uid])
+            ->one();
+
+        if (!$issueData) {
+            throw new IssueTypeNotFoundException('Could not find issue with UID ' . $uid);
+        }
+
+        return new IssueType($issueData);
+    }
+
     public function getIssueTypeByHandle(string $handle): IssueType
     {
         $issueData = (new Query())
