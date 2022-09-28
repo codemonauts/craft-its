@@ -410,8 +410,8 @@ class Issue extends Element
         switch ($attribute) {
             case 'owner':
                 $owner = $this->getOwner();
-                $button = Html::a(Craft::t('its', 'Take'), UrlHelper::cpUrl('its/issue/take/' . $this->id), ['class' => 'btn small']);
-                return $owner ? Cp::elementHtml($owner) : $button;
+                $button = Html::a(Craft::t('its', 'Take Issue'), UrlHelper::cpUrl('its/issue/take/' . $this->id), ['class' => 'btn small']);
+                return $owner ? Cp::elementHtml($owner) . $button : $button;
 
             case 'creator':
                 $creator = $this->getCreator();

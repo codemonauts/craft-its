@@ -9,6 +9,7 @@ use craft\base\Element;
 use craft\elements\Entry;
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 class IssueController extends Controller
@@ -55,5 +56,20 @@ class IssueController extends Controller
         }
 
         return $response;
+    }
+
+    public function actionTake(int $issueId): Response
+    {
+        $issue = Craft::$app->getElements()->getElementById($issueId);
+
+        if (!$issue) {
+            throw new NotFoundHttpException(Craft::t('its', 'Couldn’t find issue with ID ' . $issueId));
+        }
+
+        $issue->ownerId = Craft::$app->getUser()->getId();
+
+        Craft::$app->getElements()->saveElement($issue);
+
+        return $this->redirect('its/issues');
     }
 }

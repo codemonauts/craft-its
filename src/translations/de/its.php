@@ -20,7 +20,7 @@ return [
     'All issues' => '',
     'Subject' => '',
     'The subject of the issue.' => '',
-    'Take' => '',
+    'Take Issue' => '',
     'Date Created' => '',
     'Date Updated' => '',
 ];

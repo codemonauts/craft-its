@@ -71,6 +71,7 @@ class IssueTrackingSystem extends Plugin
 
             $event->rules['its/issue/new'] = 'its/issue/create';
             $event->rules['its/issue/<elementId:\d+>'] = 'elements/edit';
+            $event->rules['its/issue/take/<issueId:\d+>'] = 'its/issue/take';
         });
 
         // Register field layout
