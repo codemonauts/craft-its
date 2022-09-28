@@ -403,6 +403,45 @@ class Issue extends Element
     }
 
     /**
+     * @inheritDoc
+     */
+    public static function defineSortOptions(): array
+    {
+        return [
+            [
+                'label' => Craft::t('its', 'Issue ID'),
+                'orderBy' => 'id',
+                'defaultDir' => 'desc',
+            ],
+            [
+                'label' => Craft::t('its', 'Subject'),
+                'orderBy' => 'subject',
+                'defaultDir' => 'asc',
+            ],
+            [
+                'label' => Craft::t('its', 'Creator'),
+                'orderBy' => 'creatorId',
+                'defaultDir' => 'asc',
+            ],
+            [
+                'label' => Craft::t('its', 'Owner'),
+                'orderBy' => 'ownerId',
+                'defaultDir' => 'asc',
+            ],
+            [
+                'label' => Craft::t('its', 'Date Created'),
+                'orderBy' => 'dateCreated',
+                'defaultDir' => 'desc',
+            ],
+            [
+                'label' => Craft::t('its', 'Date Updated'),
+                'orderBy' => 'dateUpdated',
+                'defaultDir' => 'desc',
+            ],
+        ];
+    }
+
+    /**
      * @inheritdoc
      */
     protected function tableAttributeHtml(string $attribute): string

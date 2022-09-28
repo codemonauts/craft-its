@@ -19,6 +19,7 @@ return [
     'issues' => '',
     'All issues' => '',
     'Subject' => '',
+    'Issue ID' => '',
     'The subject of the issue.' => '',
     'Take Issue' => '',
     'Date Created' => '',
