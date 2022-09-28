@@ -50,5 +50,6 @@ class Install extends Migration
     public function safeDown()
     {
         $this->dropTableIfExists('{{%its_issues}}');
+        $this->dropTableIfExists('{{%its_issuetypes}}');
     }
 }
