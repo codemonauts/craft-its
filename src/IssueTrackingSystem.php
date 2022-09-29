@@ -69,6 +69,7 @@ class IssueTrackingSystem extends Plugin
             $event->rules['settings/plugins/its/issuetype/delete'] = 'its/issuetype/delete';
             $event->rules['settings/plugins/its/issuetype/<id:\d+>'] = 'its/issuetype/edit';
 
+            $event->rules['its/issues'] = 'its/issue/index';
             $event->rules['its/issue/new'] = 'its/issue/create';
             $event->rules['its/issue/<elementId:\d+>'] = 'elements/edit';
             $event->rules['its/issue/take/<issueId:\d+>'] = 'its/issue/take';

@@ -93,6 +93,8 @@ class IssuetypeController extends Controller
 
         $this->setSuccessFlash(Craft::t('its', 'Issue type saved.'));
 
+        Craft::$app->getCache()->set('its:issueTypeExists', 1, 31536000);
+
         return $this->redirectToPostedUrl($issueType);
     }
 

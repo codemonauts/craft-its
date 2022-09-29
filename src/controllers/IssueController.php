@@ -14,6 +14,24 @@ use yii\web\Response;
 
 class IssueController extends Controller
 {
+    public function actionIndex(): Response
+    {
+        $issueTypeExists = Craft::$app->getCache()->get('its:issueTypeExists');
+        if ($issueTypeExists === false) {
+            $issueTypeExists = count(IssueTrackingSystem::$plugin->getIssues()->getAllIssueTypes());
+            Craft::$app->getCache()->set('its:issueTypeExists', (int)$issueTypeExists, 31536000);
+        }
+        $issueTypeExists = (bool)$issueTypeExists;
+
+        if ($issueTypeExists) {
+            $template = 'its/issues/_index';
+        } else {
+            $template = 'its/issues/_missing';
+        }
+
+        return $this->renderTemplate($template);
+    }
+
     public function actionCreate(): ?Response
     {
         $user = Craft::$app->getUser()->getIdentity();
