@@ -127,8 +127,9 @@ class IssueTrackingSystem extends Plugin
     public function getCpNavItem(): ?array
     {
         $navItem = parent::getCpNavItem();
-        $subNavs = [];
+        $navItem['label'] = Craft::t('its', $this->name);
 
+        $subNavs = [];
         $subNavs['issues'] = [
             'url' => $this->handle . '/issues',
             'label' => Craft::t('its', 'Issues'),

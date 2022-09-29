@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'Issue Tracking System for Craft CMS' => '',
     'Are you sure you want to delete this issue?' => '',
     'Add Issue' => '',
     'Issue Types' => '',
@@ -24,4 +25,6 @@ return [
     'Take Issue' => '',
     'Date Created' => '',
     'Date Updated' => '',
+    'Creator' => '',
+    'Owner' => '',
 ];
