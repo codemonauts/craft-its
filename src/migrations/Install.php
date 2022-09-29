@@ -24,6 +24,18 @@ class Install extends Migration
             'PRIMARY KEY([[id]])',
         ]);
 
+        $this->dropTableIfExists('{{%its_history}}');
+        $this->createTable('{{%its_history}}', [
+            'id' => $this->primaryKey(),
+            'issueId' => $this->integer()->notNull(),
+            'event' => $this->string(),
+            'initiatorName' => $this->string(),
+            'initiatorId' => $this->integer()->null(),
+            'data' => $this->text(),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'uid' => $this->uid(),
+        ]);
+
         $this->dropTableIfExists('{{%its_issuetypes}}');
         $this->createTable('{{%its_issuetypes}}', [
             'id' => $this->primaryKey(),
@@ -40,16 +52,20 @@ class Install extends Migration
         $this->createIndex(null, '{{%its_issues}}', ['typeId']);
         $this->createIndex(null, '{{%its_issues}}', ['ownerId']);
         $this->createIndex(null, '{{%its_issues}}', ['creatorId']);
+        $this->createIndex(null, '{{%its_history}}', ['issueId', 'dateCreated']);
         $this->createIndex(null, '{{%its_issuetypes}}', ['fieldLayoutId']);
 
         $this->addForeignKey(null, '{{%its_issues}}', ['id'], Table::ELEMENTS, ['id'], 'CASCADE');
         $this->addForeignKey(null, '{{%its_issues}}', ['typeId'], '{{%its_issuetypes}}', ['id'], 'CASCADE');
+        $this->addForeignKey(null, '{{%its_history}}', ['issueId'], Table::ELEMENTS, ['id'], 'CASCADE');
+        $this->addForeignKey(null, '{{%its_history}}', ['initiatorId'], Table::ELEMENTS, ['id'], 'SET NULL');
         $this->addForeignKey(null, '{{%its_issuetypes}}', ['fieldLayoutId'], Table::FIELDLAYOUTS, ['id'], 'SET NULL');
     }
 
     public function safeDown()
     {
         $this->dropTableIfExists('{{%its_issues}}');
+        $this->dropTableIfExists('{{%its_history}}');
         $this->dropTableIfExists('{{%its_issuetypes}}');
     }
 }
