@@ -16,8 +16,8 @@ class Install extends Migration
             'status' => $this->string(20),
             'typeId' => $this->integer()->notNull(),
             'deletedWithIssueType' => $this->boolean()->null(),
-            'creatorId' => $this->integer()->null(),
-            'ownerId' => $this->integer()->null(),
+            'reporterId' => $this->integer()->null(),
+            'assigneeId' => $this->integer()->null(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
             'dateDeleted' => $this->dateTime()->null(),
@@ -50,8 +50,8 @@ class Install extends Migration
 
         $this->createIndex(null, '{{%its_issues}}', ['status']);
         $this->createIndex(null, '{{%its_issues}}', ['typeId']);
-        $this->createIndex(null, '{{%its_issues}}', ['ownerId']);
-        $this->createIndex(null, '{{%its_issues}}', ['creatorId']);
+        $this->createIndex(null, '{{%its_issues}}', ['assigneeId']);
+        $this->createIndex(null, '{{%its_issues}}', ['reporterId']);
         $this->createIndex(null, '{{%its_history}}', ['issueId', 'dateCreated']);
         $this->createIndex(null, '{{%its_issuetypes}}', ['fieldLayoutId']);
 

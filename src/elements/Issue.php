@@ -12,8 +12,10 @@ use craft\elements\User;
 use craft\helpers\Cp;
 use craft\helpers\DateTimeHelper;
 use craft\helpers\Html;
+use craft\helpers\Typecast;
 use craft\helpers\UrlHelper;
 use craft\models\FieldLayout;
+use craft\web\UploadedFile;
 use yii\base\InvalidConfigException;
 
 class Issue extends Element
@@ -34,24 +36,24 @@ class Issue extends Element
     public bool $deletedWithIssueType = false;
 
     /**
-     * @var int|null Owner (User) of the issue
+     * @var int|null Reporter (User) of the issue
      */
-    private ?int $_creatorId = null;
+    private ?int $_reporterId = null;
 
     /**
      * @var User|null|false
      */
-    private User|false|null $_creator = null;
+    private User|false|null $_reporter = null;
 
     /**
-     * @var int|null Owner (User) of the issue
+     * @var int|null Assignee (User) of the issue
      */
-    private ?int $_ownerId = null;
+    private ?int $_assigneeId = null;
 
     /**
      * @var User|null|false
      */
-    private User|false|null $_owner = null;
+    private User|false|null $_assignee = null;
 
     /**
      * @var int|null Type ID
@@ -142,8 +144,8 @@ class Issue extends Element
     public function attributes(): array
     {
         $names = parent::attributes();
-        $names[] = 'ownerId';
-        $names[] = 'creatorId';
+        $names[] = 'assigneeId';
+        $names[] = 'reporterId';
         $names[] = 'typeId';
 
         return $names;
@@ -155,8 +157,8 @@ class Issue extends Element
     public function extraFields(): array
     {
         $names = parent::extraFields();
-        $names[] = 'owner';
-        $names[] = 'creator';
+        $names[] = 'assignee';
+        $names[] = 'reporter';
         $names[] = 'type';
 
         return $names;
@@ -283,86 +285,86 @@ class Issue extends Element
         $this->fieldLayoutId = null;
     }
 
-    public function getOwnerId(): ?int
+    public function getAssigneeId(): ?int
     {
-        return $this->_ownerId;
+        return $this->_assigneeId;
     }
 
-    public function setOwnerId(array|int|string|null $ownerId): void
+    public function setAssigneeId(array|int|string|null $assigneeId): void
     {
-        if ($ownerId === '') {
-            $ownerId = null;
+        if ($assigneeId === '') {
+            $assigneeId = null;
         }
 
-        if (is_array($ownerId)) {
-            $this->_ownerId = reset($ownerId) ?: null;
+        if (is_array($assigneeId)) {
+            $this->_assigneeId = reset($assigneeId) ?: null;
         } else {
-            $this->_ownerId = $ownerId;
+            $this->_assigneeId = $assigneeId;
         }
 
-        $this->_owner = null;
+        $this->_assignee = null;
     }
 
-    public function getOwner(): ?User
+    public function getAssignee(): ?User
     {
-        if (!isset($this->_owner)) {
-            if (!$this->getOwnerId()) {
+        if (!isset($this->_assignee)) {
+            if (!$this->getAssigneeId()) {
                 return null;
             }
 
-            if (($this->_owner = Craft::$app->getUsers()->getUserById($this->getOwnerId())) === null) {
-                $this->_owner = false;
+            if (($this->_assignee = Craft::$app->getUsers()->getUserById($this->getAssigneeId())) === null) {
+                $this->_assignee = false;
             }
         }
 
-        return $this->_owner ?: null;
+        return $this->_assignee ?: null;
     }
 
-    public function setOwner(?User $owner = null): void
+    public function setAssignee(?User $assignee = null): void
     {
-        $this->_owner = $owner;
-        $this->setOwnerId($owner?->id);
+        $this->_assignee = $assignee;
+        $this->setAssigneeId($assignee?->id);
     }
 
-    public function getCreatorId(): ?int
+    public function getReporterId(): ?int
     {
-        return $this->_creatorId;
+        return $this->_reporterId;
     }
 
-    public function setCreatorId(array|int|string|null $creatorId): void
+    public function setReporterId(array|int|string|null $reporterId): void
     {
-        if ($creatorId === '') {
-            $creatorId = null;
+        if ($reporterId === '') {
+            $reporterId = null;
         }
 
-        if (is_array($creatorId)) {
-            $this->_creatorId = reset($creatorId) ?: null;
+        if (is_array($reporterId)) {
+            $this->_reporterId = reset($reporterId) ?: null;
         } else {
-            $this->_creatorId = $creatorId;
+            $this->_reporterId = $reporterId;
         }
 
-        $this->_creator = null;
+        $this->_reporter = null;
     }
 
-    public function getCreator(): ?User
+    public function getReporter(): ?User
     {
-        if (!isset($this->_creator)) {
-            if (!$this->getCreatorId()) {
+        if (!isset($this->_reporter)) {
+            if (!$this->getReporterId()) {
                 return null;
             }
 
-            if (($this->_creator = Craft::$app->getUsers()->getUserById($this->getCreatorId())) === null) {
-                $this->_creator = false;
+            if (($this->_reporter = Craft::$app->getUsers()->getUserById($this->getReporterId())) === null) {
+                $this->_reporter = false;
             }
         }
 
-        return $this->_creator ?: null;
+        return $this->_reporter ?: null;
     }
 
-    public function setCreator(?User $creator = null): void
+    public function setReporter(?User $reporter = null): void
     {
-        $this->_creator = $creator;
-        $this->setCreatorId($creator?->id);
+        $this->_reporter = $reporter;
+        $this->setReporterId($reporter?->id);
     }
 
     /**
@@ -380,8 +382,8 @@ class Issue extends Element
     {
         return [
             'subject' => Craft::t('its', 'Subject'),
-            'creator' => Craft::t('its', 'Creator'),
-            'owner' => Craft::t('its', 'Owner'),
+            'reporter' => Craft::t('its', 'Reporter'),
+            'assignee' => Craft::t('its', 'Assignee'),
             'dateCreated' => Craft::t('its', 'Date Created'),
             'dateUpdated' => Craft::t('its', 'Date Updated'),
             'durationUpdated' => Craft::t('its', 'Last Update'),
@@ -395,8 +397,8 @@ class Issue extends Element
     {
         return [
             'subject',
-            'creator',
-            'owner',
+            'reporter',
+            'assignee',
             'dateCreated',
             'durationUpdated',
         ];
@@ -419,13 +421,13 @@ class Issue extends Element
                 'defaultDir' => 'asc',
             ],
             [
-                'label' => Craft::t('its', 'Creator'),
-                'orderBy' => 'creatorId',
+                'label' => Craft::t('its', 'Reporter'),
+                'orderBy' => 'reporterId',
                 'defaultDir' => 'asc',
             ],
             [
-                'label' => Craft::t('its', 'Owner'),
-                'orderBy' => 'ownerId',
+                'label' => Craft::t('its', 'Assignee'),
+                'orderBy' => 'assigneeId',
                 'defaultDir' => 'asc',
             ],
             [
@@ -447,14 +449,14 @@ class Issue extends Element
     protected function tableAttributeHtml(string $attribute): string
     {
         switch ($attribute) {
-            case 'owner':
-                $owner = $this->getOwner();
+            case 'assignee':
+                $assignee = $this->getAssignee();
                 $button = Html::a(Craft::t('its', 'Take Issue'), UrlHelper::cpUrl('its/issue/take/' . $this->id), ['class' => 'btn small']);
-                return $owner ? Cp::elementHtml($owner) . $button : $button;
+                return $assignee ? Cp::elementHtml($assignee) . $button : $button;
 
-            case 'creator':
-                $creator = $this->getCreator();
-                return $creator ? Cp::elementHtml($creator) : '';
+            case 'reporter':
+                $reporter = $this->getReporter();
+                return $reporter ? Cp::elementHtml($reporter) : '';
 
             case 'durationUpdated':
                 return DateTimeHelper::humanDuration($this->dateUpdated?->diff(DateTimeHelper::now()));
@@ -496,8 +498,8 @@ class Issue extends Element
      */
     public function beforeValidate(): bool
     {
-        if (!$this->getCreatorId()) {
-            $this->setCreatorId(Craft::$app->getUser()->getId());
+        if (!$this->getReporterId()) {
+            $this->setReporterId(Craft::$app->getUser()->getId());
         }
 
         return parent::beforeValidate();
@@ -523,7 +525,7 @@ class Issue extends Element
 
                 if ($currentIssue) {
                     $revisionNotes = 'Revision from ' . Craft::$app->getFormatter()->asDatetime($currentIssue->dateUpdated);
-                    Craft::$app->getRevisions()->createRevision($currentIssue, $currentIssue->getCreatorId(), $revisionNotes);
+                    Craft::$app->getRevisions()->createRevision($currentIssue, $currentIssue->getReporterId(), $revisionNotes);
                 }
             }
         }
@@ -571,8 +573,8 @@ class Issue extends Element
         $record->subject = $this->subject;
         $record->status = $this->status;
         $record->typeId = $this->getTypeId();
-        $record->ownerId = $this->getOwnerId();
-        $record->creatorId = $this->getCreatorId();
+        $record->assigneeId = $this->getAssigneeId();
+        $record->reporterId = $this->getReporterId();
 
         $dirtyAttributes = array_keys($record->getDirtyAttributes());
 
@@ -581,6 +583,22 @@ class Issue extends Element
         $this->setDirtyAttributes($dirtyAttributes);
 
         parent::afterSave($isNew);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setAttributes($values, $safeOnly = true): void
+    {
+        parent::setAttributes($values, $safeOnly);
+
+        if (isset($values['assignee'])) {
+            $this->setAssigneeId($values['assignee']);
+        }
+
+        if (isset($values['reporter'])) {
+            $this->setAssigneeId($values['reporter']);
+        }
     }
 
     private function shouldSaveRevision(): bool

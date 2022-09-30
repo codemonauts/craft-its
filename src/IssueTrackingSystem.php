@@ -3,6 +3,8 @@
 namespace codemonauts\its;
 
 use codemonauts\its\elements\Issue;
+use codemonauts\its\fieldlayoutelements\ReporterField;
+use codemonauts\its\fieldlayoutelements\AssigneeField;
 use codemonauts\its\fieldlayoutelements\SubjectField;
 use codemonauts\its\models\Settings;
 use codemonauts\its\services\Issues;
@@ -66,7 +68,7 @@ class IssueTrackingSystem extends Plugin
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function (RegisterUrlRulesEvent $event) {
             $event->rules['settings/plugins/its/issuetypes'] = 'its/issuetype/index';
             $event->rules['settings/plugins/its/issuetype/new'] = 'its/issuetype/edit';
-            $event->rules['settings/plugins/its/issuetype/delete'] = 'its/issuetype/delete';
+            $event->rules['its/issuetype/delete'] = 'its/issuetype/delete';
             $event->rules['settings/plugins/its/issuetype/<id:\d+>'] = 'its/issuetype/edit';
 
             $event->rules['its/issues'] = 'its/issue/index';
@@ -84,6 +86,8 @@ class IssueTrackingSystem extends Plugin
 
             if ($fieldLayout->type === Issue::class) {
                 $event->fields[] = SubjectField::class;
+                $event->fields[] = ReporterField::class;
+                $event->fields[] = AssigneeField::class;
             }
         });
     }

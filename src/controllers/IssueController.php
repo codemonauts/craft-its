@@ -84,7 +84,7 @@ class IssueController extends Controller
             throw new NotFoundHttpException(Craft::t('its', 'Couldn’t find issue with ID ' . $issueId));
         }
 
-        $issue->ownerId = Craft::$app->getUser()->getId();
+        $issue->assigneeId = Craft::$app->getUser()->getId();
 
         Craft::$app->getElements()->saveElement($issue);
 

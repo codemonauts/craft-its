@@ -22,9 +22,9 @@ class IssueQuery extends ElementQuery
 
     public ?string $subject = null;
 
-    public mixed $ownerId = null;
+    public mixed $assigneeId = null;
 
-    public mixed $creatorId = null;
+    public mixed $reporterId = null;
 
     public mixed $typeId = null;
 
@@ -57,9 +57,9 @@ class IssueQuery extends ElementQuery
      *
      * @return static self reference
      */
-    public function owner(?User $value): self
+    public function assignee(?User $value): self
     {
-        $this->ownerId = $value?->id;
+        $this->assigneeId = $value?->id;
 
         return $this;
     }
@@ -69,9 +69,9 @@ class IssueQuery extends ElementQuery
      *
      * @return static self reference
      */
-    public function ownerId(array|int $value): self
+    public function assigneeId(array|int $value): self
     {
-        $this->ownerId = $value;
+        $this->assigneeId = $value;
 
         return $this;
     }
@@ -81,9 +81,9 @@ class IssueQuery extends ElementQuery
      *
      * @return static self reference
      */
-    public function creator(?User $value): self
+    public function reporter(?User $value): self
     {
-        $this->creatorId = $value?->id;
+        $this->reporterId = $value?->id;
 
         return $this;
     }
@@ -93,9 +93,9 @@ class IssueQuery extends ElementQuery
      *
      * @return static self reference
      */
-    public function creatorId(array|int $value): self
+    public function reporterId(array|int $value): self
     {
-        $this->creatorId = $value;
+        $this->reporterId = $value;
 
         return $this;
     }
@@ -152,16 +152,16 @@ class IssueQuery extends ElementQuery
             'its_issues.subject',
             'its_issues.status',
             'its_issues.typeId',
-            'its_issues.creatorId',
-            'its_issues.ownerId',
+            'its_issues.reporterId',
+            'its_issues.assigneeId',
         ]);
 
-        if ($this->ownerId) {
-            $this->subQuery->andWhere(['its_issues.ownerId' => $this->ownerId]);
+        if ($this->assigneeId) {
+            $this->subQuery->andWhere(['its_issues.assigneeId' => $this->assigneeId]);
         }
 
-        if ($this->creatorId) {
-            $this->subQuery->andWhere(['its_issues.creatorId' => $this->creatorId]);
+        if ($this->reporterId) {
+            $this->subQuery->andWhere(['its_issues.reporterId' => $this->reporterId]);
         }
 
         if ($this->typeId) {
@@ -180,26 +180,26 @@ class IssueQuery extends ElementQuery
     }
 
     /**
-     * Normalizes the ownerId and creatorId params to an array of IDs or null
+     * Normalizes the assigneeId and reporterId params to an array of IDs or null
      *
      * @throws InvalidConfigException
      */
     private function normalizeUserIds(): void
     {
-        if ($this->ownerId !== null) {
-            if (is_numeric($this->ownerId)) {
-                $this->ownerId = [$this->ownerId];
+        if ($this->assigneeId !== null) {
+            if (is_numeric($this->assigneeId)) {
+                $this->assigneeId = [$this->assigneeId];
             }
-            if (!is_array($this->ownerId) || !ArrayHelper::isNumeric($this->ownerId)) {
+            if (!is_array($this->assigneeId) || !ArrayHelper::isNumeric($this->assigneeId)) {
                 throw new InvalidConfigException();
             }
         }
 
-        if ($this->creatorId !== null) {
-            if (is_numeric($this->creatorId)) {
-                $this->creatorId = [$this->creatorId];
+        if ($this->reporterId !== null) {
+            if (is_numeric($this->reporterId)) {
+                $this->reporterId = [$this->reporterId];
             }
-            if (!is_array($this->creatorId) || !ArrayHelper::isNumeric($this->creatorId)) {
+            if (!is_array($this->reporterId) || !ArrayHelper::isNumeric($this->reporterId)) {
                 throw new InvalidConfigException();
             }
         }

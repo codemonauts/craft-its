@@ -12,12 +12,12 @@ use yii\db\ActiveQueryInterface;
  * @property string $subject Subject
  * @property string $status Status
  * @property int $typeId Type ID
- * @property int|null $creatorId Creator ID
- * @property int|null $ownerId Owner ID
+ * @property int|null $reporterId Reporter ID
+ * @property int|null $assigneeId Assignee ID
  * @property Element $element Element
  * @property IssueType $type Type
- * @property User $owner Owner
- * @property User $creator Creator
+ * @property User $assignee Assignee
+ * @property User $reporter Reporter
  */
 class Issue extends ActiveRecord
 {
@@ -39,13 +39,13 @@ class Issue extends ActiveRecord
         return $this->hasOne(IssueType::class, ['id' => 'typeId']);
     }
 
-    public function getOwner(): ActiveQueryInterface
+    public function getAssignee(): ActiveQueryInterface
     {
-        return $this->hasOne(User::class, ['id' => 'ownerId']);
+        return $this->hasOne(User::class, ['id' => 'assigneeId']);
     }
 
-    public function getCreator(): ActiveQueryInterface
+    public function getReporter(): ActiveQueryInterface
     {
-        return $this->hasOne(User::class, ['id' => 'creatorId']);
+        return $this->hasOne(User::class, ['id' => 'reporterId']);
     }
 }
