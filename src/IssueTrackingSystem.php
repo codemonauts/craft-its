@@ -90,6 +90,9 @@ class IssueTrackingSystem extends Plugin
                 $event->fields[] = AssigneeField::class;
             }
         });
+
+        // Register project config update
+        self::$plugin->getIssues();
     }
 
     /**
