@@ -14,6 +14,13 @@ use yii\web\Response;
 
 class IssueController extends Controller
 {
+    public function beforeAction($action): bool
+    {
+        $this->view->registerCss(Issue::statusesStyles());
+
+        return parent::beforeAction($action);
+    }
+
     public function actionIndex(): Response
     {
         $issueTypeExists = Craft::$app->getCache()->get('its:issueTypeExists');

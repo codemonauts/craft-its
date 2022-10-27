@@ -251,7 +251,7 @@ class Issue extends Element
 
         $issueType = IssueTrackingSystem::$plugin->getIssues()->getIssueTypeById($this->_typeId);
         if (!$issueType) {
-            throw new InvalidConfigException("Issue has no issue types");
+            throw new InvalidConfigException("Issue has no issue type");
         }
 
         return $issueType;
@@ -609,5 +609,44 @@ class Issue extends Element
             !$this->getIsDraft() &&
             !$this->getIsRevision()
         );
+    }
+
+    public static function statuses(): array
+    {
+        $statuses = Craft::$app->getCache()->get('its:statuses');
+
+        if (!$statuses) {
+            $statuses = [];
+
+            foreach (IssueTrackingSystem::$settings->statuses as $status) {
+                $statuses[$status[1]] = ['label' => Craft::t('its', $status[0]), 'color' => 'its-status-'.$status[1]];
+            }
+
+            Craft::$app->getCache()->set('its:statuses', $statuses);
+        }
+
+        return $statuses;
+    }
+
+    public static function statusesStyles(): string
+    {
+        $css = Craft::$app->getCache()->get('its:statuses:css');
+
+        if (!$css) {
+            $css = '';
+
+            foreach (IssueTrackingSystem::$settings->statuses as $status) {
+                $css .= '.its-status-'.$status[1] . '{ background-color: #'.$status[2].'; }';
+            }
+
+            Craft::$app->getCache()->set('its:statuses:css', $css);
+        }
+
+        return $css;
+    }
+
+    public function getStatus(): null|string
+    {
+        return IssueTrackingSystem::$settings->statuses[$this->status] ?? '';
     }
 }

@@ -91,6 +91,12 @@ class IssueTrackingSystem extends Plugin
             }
         });
 
+        // Delete status cache after saving settings.
+        Event::on(Plugin::class, Plugin::EVENT_AFTER_SAVE_SETTINGS, function () {
+            Craft::$app->getCache()->delete('its:statuses');
+            Craft::$app->getCache()->delete('its:statuses:css');
+        });
+
         // Register project config update
         self::$plugin->getIssues();
     }
