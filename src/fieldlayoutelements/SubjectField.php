@@ -4,7 +4,9 @@ namespace codemonauts\its\fieldlayoutelements;
 
 use Craft;
 use craft\base\ElementInterface;
+use craft\elements\conditions\ElementConditionInterface;
 use craft\fieldlayoutelements\TextField;
+use craft\fields\conditions\TextFieldConditionRule;
 
 class SubjectField extends TextField
 {

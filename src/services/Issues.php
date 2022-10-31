@@ -96,6 +96,11 @@ class Issues extends Component
         return new IssueType($issueData);
     }
 
+    /**
+     * Returns all issue types available.
+     *
+     * @return IssueType[]
+     */
     public function getAllIssueTypes(): array
     {
         $issueTypes = [];

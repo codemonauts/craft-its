@@ -2,6 +2,7 @@
 
 namespace codemonauts\its\elements;
 
+use codemonauts\its\elements\conditions\IssueCondition;
 use codemonauts\its\elements\db\IssueQuery;
 use codemonauts\its\exceptions\IssueTypeNotFoundException;
 use codemonauts\its\IssueTrackingSystem;
@@ -9,6 +10,7 @@ use codemonauts\its\models\IssueType;
 use codemonauts\its\records\Issue as IssueRecord;
 use Craft;
 use craft\base\Element;
+use craft\elements\conditions\ElementConditionInterface;
 use craft\elements\User;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
@@ -635,5 +637,13 @@ class Issue extends Element
         $state = ArrayHelper::where($statuses, 1, $this->state, false, false);
 
         return $state[0][0] ?? '';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function createCondition(): ElementConditionInterface
+    {
+        return Craft::createObject(IssueCondition::class, [static::class]);
     }
 }
