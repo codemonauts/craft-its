@@ -32,6 +32,11 @@ class IssueType extends Model
     public ?string $handle = null;
 
     /**
+     * @var array Statuses
+     */
+    public array $statuses = [];
+
+    /**
      * @var int|null Field layout ID
      */
     public ?int $fieldLayoutId = null;
@@ -109,6 +114,7 @@ class IssueType extends Model
         $config = [
             'name' => $this->name,
             'handle' => $this->handle,
+            'statuses' => $this->statuses,
         ];
 
         $fieldLayout = $this->getFieldLayout();

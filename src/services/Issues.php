@@ -4,6 +4,7 @@ namespace codemonauts\its\services;
 
 use codemonauts\its\elements\Issue;
 use codemonauts\its\exceptions\IssueTypeNotFoundException;
+use codemonauts\its\helpers\ColorHelper;
 use codemonauts\its\models\IssueType;
 use codemonauts\its\records\IssueType as IssueTypeRecord;
 use Craft;
@@ -36,6 +37,7 @@ class Issues extends Component
                 'id',
                 'name',
                 'handle',
+                'statuses',
                 'fieldLayoutId',
                 'uid',
             ])
@@ -57,6 +59,7 @@ class Issues extends Component
                 'id',
                 'name',
                 'handle',
+                'statuses',
                 'fieldLayoutId',
                 'uid',
             ])
@@ -78,6 +81,7 @@ class Issues extends Component
                 'id',
                 'name',
                 'handle',
+                'statuses',
                 'fieldLayoutId',
                 'uid',
             ])
@@ -101,6 +105,7 @@ class Issues extends Component
                 'id',
                 'name',
                 'handle',
+                'statuses',
                 'fieldLayoutId',
                 'uid',
             ])
@@ -155,6 +160,7 @@ class Issues extends Component
 
             $issueTypeRecord->name = $data['name'];
             $issueTypeRecord->handle = $data['handle'];
+            $issueTypeRecord->statuses = $data['statuses'];
             $issueTypeRecord->uid = $issueTypeUid;
 
             if (!empty($data['fieldLayouts'])) {
@@ -164,7 +170,7 @@ class Issues extends Component
                 $layout->uid = key($data['fieldLayouts']);
                 Craft::$app->getFields()->saveLayout($layout, false);
                 $issueTypeRecord->fieldLayoutId = $layout->id;
-            } else if ($issueTypeRecord->fieldLayoutId) {
+            } elseif ($issueTypeRecord->fieldLayoutId) {
                 Craft::$app->getFields()->deleteLayoutById($issueTypeRecord->fieldLayoutId);
                 $issueTypeRecord->fieldLayoutId = null;
             }
@@ -284,5 +290,38 @@ class Issues extends Component
         $query->andWhere(['uid' => $uid]);
 
         return $query->one() ?? new IssueTypeRecord();
+    }
+
+    public static function registerStatusCss()
+    {
+        $css = Craft::$app->getCache()->get('its:statuses:css');
+
+        if (!$css) {
+            $css = '';
+
+            $issueTypes = (new Issues)->getAllIssueTypes();
+            foreach ($issueTypes as $type) {
+                foreach ($type->statuses as $status) {
+                    // TODO: Check color function
+                    $adjustment = ColorHelper::isLight($status[2]) ? 1 : 1;
+                    $correspondingColor = ColorHelper::adjustBrightness($status[2], $adjustment);
+                    $css .= '.its-status-' . $type->handle . '-' . $status[1] . '{ background-color: #' . $status[2] . '; }';
+                    $css .= '.its-badge-' . $type->handle . '-' . $status[1] . '{
+                        background-color: #' . $status[2] . ';
+                        border-radius: var(--s);
+                        color: #' . $correspondingColor . ';
+                        -webkit-flex-shrink: 1;
+                        flex-shrink: 1;
+                        font-size: 14px;
+                        line-height: 16px;
+                        padding: 2px 8px;
+                    }';
+                }
+            }
+
+            Craft::$app->getCache()->set('its:statuses:css', $css);
+        }
+
+        Craft::$app->getView()->registerCss($css);
     }
 }

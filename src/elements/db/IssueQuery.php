@@ -18,7 +18,7 @@ use yii\base\InvalidConfigException;
  */
 class IssueQuery extends ElementQuery
 {
-    public string|array|null $status = null;
+    public string|array|null $state = null;
 
     public ?string $subject = null;
 
@@ -33,9 +33,9 @@ class IssueQuery extends ElementQuery
      *
      * @return static self reference
      */
-    public function status(string|array|null $value): self
+    public function state(string|array|null $value): self
     {
-        $this->status = $value;
+        $this->state = $value;
 
         return $this;
     }
@@ -109,7 +109,7 @@ class IssueQuery extends ElementQuery
      */
     public function type(mixed $value): self
     {
-        if (Db::normalizeParam($value, function($item) {
+        if (Db::normalizeParam($value, function ($item) {
             if (is_string($item)) {
                 $item = IssueTrackingSystem::$plugin->getIssues()->getIssueTypeByHandle($item);
             }
@@ -150,7 +150,7 @@ class IssueQuery extends ElementQuery
 
         $this->query->select([
             'its_issues.subject',
-            'its_issues.status',
+            'its_issues.state',
             'its_issues.typeId',
             'its_issues.reporterId',
             'its_issues.assigneeId',
@@ -168,8 +168,8 @@ class IssueQuery extends ElementQuery
             $this->subQuery->andWhere(['its_issues.typeId' => $this->typeId]);
         }
 
-        if ($this->status) {
-            $this->subQuery->andWhere(['its_issues.status' => $this->status]);
+        if ($this->state) {
+            $this->subQuery->andWhere(['its_issues.state' => $this->state]);
         }
 
         if ($this->subject) {

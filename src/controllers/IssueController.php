@@ -4,6 +4,7 @@ namespace codemonauts\its\controllers;
 
 use codemonauts\its\elements\Issue;
 use codemonauts\its\IssueTrackingSystem;
+use codemonauts\its\services\Issues;
 use Craft;
 use craft\base\Element;
 use craft\elements\Entry;
@@ -14,13 +15,6 @@ use yii\web\Response;
 
 class IssueController extends Controller
 {
-    public function beforeAction($action): bool
-    {
-        $this->view->registerCss(Issue::statusesStyles());
-
-        return parent::beforeAction($action);
-    }
-
     public function actionIndex(): Response
     {
         $issueTypeExists = Craft::$app->getCache()->get('its:issueTypeExists');
@@ -35,6 +29,8 @@ class IssueController extends Controller
         } else {
             $template = 'its/issues/_missing';
         }
+
+        Issues::registerStatusCss();
 
         return $this->renderTemplate($template);
     }

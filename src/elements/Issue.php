@@ -3,19 +3,19 @@
 namespace codemonauts\its\elements;
 
 use codemonauts\its\elements\db\IssueQuery;
+use codemonauts\its\exceptions\IssueTypeNotFoundException;
 use codemonauts\its\IssueTrackingSystem;
 use codemonauts\its\models\IssueType;
 use codemonauts\its\records\Issue as IssueRecord;
 use Craft;
 use craft\base\Element;
 use craft\elements\User;
+use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
 use craft\helpers\DateTimeHelper;
 use craft\helpers\Html;
-use craft\helpers\Typecast;
 use craft\helpers\UrlHelper;
 use craft\models\FieldLayout;
-use craft\web\UploadedFile;
 use yii\base\InvalidConfigException;
 
 class Issue extends Element
@@ -26,9 +26,9 @@ class Issue extends Element
     public string $subject = '';
 
     /**
-     * @var string|null Status of the issue
+     * @var string|null State of the issue
      */
-    public ?string $status = null;
+    public ?string $state = null;
 
     /**
      * @var bool Whether the issue was deleted along with its issue type
@@ -135,7 +135,7 @@ class Issue extends Element
      */
     public static function hasStatuses(): bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -220,28 +220,43 @@ class Issue extends Element
     {
         $sources = [];
 
-        $sources[] = [
-            'key' => '*',
-            'label' => Craft::t('its', 'All issues'),
-        ];
+        if (IssueTrackingSystem::$settings->allIssuesAsSource) {
+            $sources[] = [
+                'key' => '*',
+                'label' => Craft::t('its', 'All Issues'),
+            ];
+        }
+
+        if (IssueTrackingSystem::$settings->myIssuesAsSource) {
+            $sources[] = [
+                'key' => 'my-issues',
+                'label' => Craft::t('its', 'My Issues'),
+                'criteria' => [
+                    'assigneeId' => Craft::$app->getUser()->getId(),
+                ],
+            ];
+        }
 
         $issueTypes = IssueTrackingSystem::$plugin->getIssues()->getAllIssueTypes();
 
         foreach ($issueTypes as $issueType) {
-            $source = [
+            $sources[] = [
                 'key' => 'type:' . $issueType->uid,
                 'label' => Craft::t('its', $issueType->name),
                 'criteria' => [
                     'typeId' => $issueType->id,
                 ],
             ];
-
-            $sources[] = $source;
         }
 
         return $sources;
     }
 
+    /**
+     * @return \codemonauts\its\models\IssueType
+     * @throws \codemonauts\its\exceptions\IssueTypeNotFoundException
+     * @throws \yii\base\InvalidConfigException
+     */
     public function getType(): IssueType
     {
         if (!isset($this->_typeId)) {
@@ -249,12 +264,7 @@ class Issue extends Element
             $this->_typeId = $issueTypes[0]->id;
         }
 
-        $issueType = IssueTrackingSystem::$plugin->getIssues()->getIssueTypeById($this->_typeId);
-        if (!$issueType) {
-            throw new InvalidConfigException("Issue has no issue type");
-        }
-
-        return $issueType;
+        return IssueTrackingSystem::$plugin->getIssues()->getIssueTypeById($this->_typeId);
     }
 
     /**
@@ -268,7 +278,7 @@ class Issue extends Element
 
         try {
             $issueType = $this->getType();
-        } catch (InvalidConfigException) {
+        } catch (IssueTypeNotFoundException) {
             return null;
         }
         return $issueType->getFieldLayout();
@@ -387,6 +397,7 @@ class Issue extends Element
             'dateCreated' => Craft::t('its', 'Date Created'),
             'dateUpdated' => Craft::t('its', 'Date Updated'),
             'durationUpdated' => Craft::t('its', 'Last Update'),
+            'state' => Craft::t('its', 'State'),
         ];
     }
 
@@ -461,6 +472,9 @@ class Issue extends Element
             case 'durationUpdated':
                 return DateTimeHelper::humanDuration($this->dateUpdated?->diff(DateTimeHelper::now()));
 
+            case 'state':
+                return '<span class="its-badge-' . $this->getType()->handle . '-' . $this->state . '">' . $this->getStatusLabel() . '</span>';
+
             case 'type':
                 try {
                     return Html::encode(Craft::t('its', $this->getType()->name));
@@ -477,7 +491,7 @@ class Issue extends Element
      */
     protected static function defineFieldLayouts(string $source): array
     {
-        if ($source === '*') {
+        if ($source === '*' || 'my-issues') {
             $issueTypes = IssueTrackingSystem::$plugin->getIssues()->getAllIssueTypes();
         } else {
             preg_match('/^type:(.+)$/', $source, $matches) &&
@@ -549,6 +563,7 @@ class Issue extends Element
         $rules = parent::defineRules();
 
         $rules[] = [['subject'], 'required', 'on' => self::SCENARIO_LIVE];
+        $rules[] = [['state'], 'string'];
         $rules[] = [['typeId'], 'integer'];
 
         return $rules;
@@ -563,7 +578,7 @@ class Issue extends Element
             $record = IssueRecord::findOne($this->id);
 
             if (!$record) {
-                throw new InvalidConfigException('Invalid issue ID '.$this->id);
+                throw new InvalidConfigException('Invalid issue ID ' . $this->id);
             }
         } else {
             $record = new IssueRecord();
@@ -571,7 +586,7 @@ class Issue extends Element
         }
 
         $record->subject = $this->subject;
-        $record->status = $this->status;
+        $record->state = $this->state;
         $record->typeId = $this->getTypeId();
         $record->assigneeId = $this->getAssigneeId();
         $record->reporterId = $this->getReporterId();
@@ -581,6 +596,8 @@ class Issue extends Element
         $record->save(false);
 
         $this->setDirtyAttributes($dirtyAttributes);
+
+        Craft::$app->getCache()->delete('its:statuses:css:' . $this->id);
 
         parent::afterSave($isNew);
     }
@@ -611,42 +628,12 @@ class Issue extends Element
         );
     }
 
-    public static function statuses(): array
+    public function getStatusLabel()
     {
-        $statuses = Craft::$app->getCache()->get('its:statuses');
+        $statuses = $this->getType()->statuses;
 
-        if (!$statuses) {
-            $statuses = [];
+        $state = ArrayHelper::where($statuses, 1, $this->state, false, false);
 
-            foreach (IssueTrackingSystem::$settings->statuses as $status) {
-                $statuses[$status[1]] = ['label' => Craft::t('its', $status[0]), 'color' => 'its-status-'.$status[1]];
-            }
-
-            Craft::$app->getCache()->set('its:statuses', $statuses);
-        }
-
-        return $statuses;
-    }
-
-    public static function statusesStyles(): string
-    {
-        $css = Craft::$app->getCache()->get('its:statuses:css');
-
-        if (!$css) {
-            $css = '';
-
-            foreach (IssueTrackingSystem::$settings->statuses as $status) {
-                $css .= '.its-status-'.$status[1] . '{ background-color: #'.$status[2].'; }';
-            }
-
-            Craft::$app->getCache()->set('its:statuses:css', $css);
-        }
-
-        return $css;
-    }
-
-    public function getStatus(): null|string
-    {
-        return IssueTrackingSystem::$settings->statuses[$this->status] ?? '';
+        return $state[0][0] ?? '';
     }
 }

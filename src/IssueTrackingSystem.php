@@ -5,6 +5,7 @@ namespace codemonauts\its;
 use codemonauts\its\elements\Issue;
 use codemonauts\its\fieldlayoutelements\ReporterField;
 use codemonauts\its\fieldlayoutelements\AssigneeField;
+use codemonauts\its\fieldlayoutelements\StatusField;
 use codemonauts\its\fieldlayoutelements\SubjectField;
 use codemonauts\its\models\Settings;
 use codemonauts\its\services\Issues;
@@ -44,6 +45,11 @@ class IssueTrackingSystem extends Plugin
      * @inheritDoc
      */
     public bool $hasCpSection = true;
+
+    /**
+     * @inheritDoc
+     */
+    public string $schemaVersion = '1.0.1';
 
     /**
      * @inheritDoc
@@ -88,13 +94,8 @@ class IssueTrackingSystem extends Plugin
                 $event->fields[] = SubjectField::class;
                 $event->fields[] = ReporterField::class;
                 $event->fields[] = AssigneeField::class;
+                $event->fields[] = StatusField::class;
             }
-        });
-
-        // Delete status cache after saving settings.
-        Event::on(Plugin::class, Plugin::EVENT_AFTER_SAVE_SETTINGS, function () {
-            Craft::$app->getCache()->delete('its:statuses');
-            Craft::$app->getCache()->delete('its:statuses:css');
         });
 
         // Register project config update
@@ -115,9 +116,8 @@ class IssueTrackingSystem extends Plugin
     protected function settingsHtml(): ?string
     {
         return Craft::$app->getView()->renderTemplate('its/settings/_settings', [
-                'settings' => $this->getSettings(),
-            ]
-        );
+            'settings' => $this->getSettings(),
+        ]);
     }
 
     /**

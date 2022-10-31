@@ -51,6 +51,36 @@
 
     <hr>
 
+    {{ forms.editableTableField({
+        first: true,
+        label: 'Statuses'|t('its'),
+        instructions: 'Define the statuses the issues can have.'|t('its'),
+        id: 'statuses',
+        name: 'statuses',
+        cols: [
+            {
+                heading: 'Name'|t('its'),
+                type: 'singleline'
+            },
+            {
+                heading: 'Handle'|t('its'),
+                type: 'handle'
+            },
+            {
+                heading: 'Color'|t('its'),
+                type: 'color'
+            },
+        ],
+        rows: issueType.statuses,
+        errors: issueType.getErrors('statuses'),
+        allowAdd: true,
+        allowReorder: true,
+        allowDelete: true,
+        addRowLabel: 'Add new status'|t('its')
+    }) }}
+
+    <hr>
+
     {{ forms.fieldLayoutDesignerField({
         fieldLayout: issueType.getFieldLayout(),
     }) }}

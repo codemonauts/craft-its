@@ -18,7 +18,8 @@ return [
     'Issue' => '',
     'issue' => '',
     'issues' => '',
-    'All issues' => '',
+    'All Issues' => '',
+    'My Issues' => '',
     'Subject' => '',
     'Issue ID' => '',
     'The subject of the issue.' => '',
@@ -30,4 +31,5 @@ return [
     'Reporter' => '',
     'Assignee' => '',
     'Last Update' => '',
+    'State' => ''
 ];

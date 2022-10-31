@@ -1,29 +1,17 @@
 {% import "_includes/forms" as forms %}
 
-{{ forms.editableTableField({
-    first: true,
-    label: 'Statuses'|t('its'),
-    instructions: 'Define the statuses the issues can have.'|t('its'),
-    id: 'statuses',
-    name: 'statuses',
-    cols: [
-        {
-            heading: 'Name',
-            type: 'singleline'
-        },
-        {
-            heading: 'Handle',
-            type: 'handle'
-        },
-        {
-            heading: 'Color',
-            type: 'color'
-        },
-    ],
-    rows: settings.statuses,
-    errors: settings.getErrors('statuses'),
-    allowAdd: true,
-    allowReorder: true,
-    allowDelete: true,
-    addRowLabel: 'Add new status'|t('its')
+{{ forms.lightswitch({
+    label: 'Add "My Issues" as sources'|t('its'),
+    id: 'myIssuesAsSource',
+    name: 'myIssuesAsSource',
+    errors: settings.getErrors('myIssuesAsSource'),
+    on: settings.myIssuesAsSource
+}) }}
+
+{{ forms.lightswitch({
+    label: 'Show "All Issues" as sources'|t('its'),
+    id: 'allIssuesAsSource',
+    name: 'allIssuesAsSource',
+    errors: settings.getErrors('allIssuesAsSource'),
+    on: settings.allIssuesAsSource
 }) }}

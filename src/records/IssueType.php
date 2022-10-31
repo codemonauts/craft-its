@@ -12,6 +12,7 @@ use yii2tech\ar\softdelete\SoftDeleteBehavior;
  * @property int $id ID
  * @property string $name Name
  * @property string $handle Handle
+ * @property string $statuses Statuses
  * @property int|null $fieldLayoutId Field layout ID
  * @property FieldLayout $fieldLayout Field layout
  *

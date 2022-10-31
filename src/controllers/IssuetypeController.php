@@ -35,10 +35,6 @@ class IssuetypeController extends Controller
         if ($id !== null) {
             if ($issueType === null) {
                 $issueType = IssueTrackingSystem::$plugin->getIssues()->getIssueTypeById($id);
-
-                if (!$issueType) {
-                    throw new NotFoundHttpException('Issue type not found');
-                }
             }
 
             $title = trim($issueType->name) ?: Craft::t('its', 'Edit Issue Type');
@@ -67,15 +63,13 @@ class IssuetypeController extends Controller
 
         if ($issueTypeId) {
             $issueType = $issueService->getIssueTypeById($issueTypeId);
-            if (!$issueType) {
-                throw new BadRequestHttpException("Invalid issue type ID: $issueTypeId");
-            }
         } else {
             $issueType = new IssueType();
         }
 
         $issueType->name = $this->request->getBodyParam('name', $issueType->name);
         $issueType->handle = $this->request->getBodyParam('handle', $issueType->handle);
+        $issueType->statuses = $this->request->getBodyParam('statuses', $issueType->statuses);
 
         $fieldLayout = Craft::$app->getFields()->assembleLayoutFromPost();
         $fieldLayout->type = Issue::class;

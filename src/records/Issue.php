@@ -10,7 +10,7 @@ use yii\db\ActiveQueryInterface;
 /**
  * @property int $id ID
  * @property string $subject Subject
- * @property string $status Status
+ * @property string $state State
  * @property int $typeId Type ID
  * @property int|null $reporterId Reporter ID
  * @property int|null $assigneeId Assignee ID

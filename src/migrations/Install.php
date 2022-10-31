@@ -13,7 +13,7 @@ class Install extends Migration
         $this->createTable('{{%its_issues}}', [
             'id' => $this->integer()->notNull(),
             'subject' => $this->string(),
-            'status' => $this->string(20),
+            'state' => $this->string(20),
             'typeId' => $this->integer()->notNull(),
             'deletedWithIssueType' => $this->boolean()->null(),
             'reporterId' => $this->integer()->null(),
@@ -41,6 +41,7 @@ class Install extends Migration
             'id' => $this->primaryKey(),
             'name' => $this->string()->notNull(),
             'handle' => $this->string()->notNull(),
+            'statuses' => $this->text()->null(),
             'fieldLayoutId' => $this->integer(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),

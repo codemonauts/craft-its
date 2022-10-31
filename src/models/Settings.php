@@ -7,7 +7,12 @@ use craft\base\Model;
 class Settings extends Model
 {
     /**
-     * @var array $statuses Statuses the issues can have.
+     * @var bool $myIssuesAsSource Whether to show the 'My Issues' source
      */
-    public array $statuses = [];
+    public bool $myIssuesAsSource = true;
+
+    /**
+     * @var bool $allIssuesAsSource Whether to show the 'All Issues' source
+     */
+    public bool $allIssuesAsSource = true;
 }
