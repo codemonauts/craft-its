@@ -473,7 +473,8 @@ class Issue extends Element
                 return $reporter ? Cp::elementHtml($reporter) : '';
 
             case 'durationUpdated':
-                return DateTimeHelper::humanDuration($this->dateUpdated?->diff(DateTimeHelper::now()));
+                $diff = $this->dateUpdated?->diff(DateTimeHelper::now());
+                return IssueTrackingSystem::$settings->useShortHumanDuration ? \codemonauts\its\helpers\DateTimeHelper::shortHumanDuration($diff) : DateTimeHelper::humanDuration($diff);
 
             case 'state':
                 return '<span class="its-badge-' . $this->getType()->handle . '-' . $this->state . '">' . $this->getStatusLabel() . '</span>';

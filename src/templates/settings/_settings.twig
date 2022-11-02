@@ -15,3 +15,11 @@
     errors: settings.getErrors('allIssuesAsSource'),
     on: settings.allIssuesAsSource
 }) }}
+
+{{ forms.lightswitch({
+    label: 'Use short human durations for date updated.'|t('its'),
+    id: 'useShortHumanDuration',
+    name: 'useShortHumanDuration',
+    errors: settings.getErrors('useShortHumanDuration'),
+    on: settings.useShortHumanDuration
+}) }}
