@@ -466,7 +466,11 @@ class Issue extends Element
             case 'assignee':
                 $assignee = $this->getAssignee();
                 $button = Html::a(Craft::t('its', 'Take Issue'), UrlHelper::cpUrl('its/issue/take/' . $this->id), ['class' => 'btn small']);
-                return $assignee ? Cp::elementHtml($assignee) . $button : $button;
+                if ($assignee) {
+                    return IssueTrackingSystem::$settings->showTakeButtonWhenAssigned ? Cp::elementHtml($assignee) . $button : Cp::elementHtml($assignee);
+                }
+
+                return $button;
 
             case 'reporter':
                 $reporter = $this->getReporter();

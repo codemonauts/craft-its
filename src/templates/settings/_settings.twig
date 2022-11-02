@@ -17,9 +17,17 @@
 }) }}
 
 {{ forms.lightswitch({
-    label: 'Use short human durations for date updated.'|t('its'),
+    label: 'Use short human durations for date updated in tables.'|t('its'),
     id: 'useShortHumanDuration',
     name: 'useShortHumanDuration',
     errors: settings.getErrors('useShortHumanDuration'),
     on: settings.useShortHumanDuration
+}) }}
+
+{{ forms.lightswitch({
+    label: 'Show "Take Issue" button in index tables even if the issue is assigned.'|t('its'),
+    id: 'showTakeButtonWhenAssigned',
+    name: 'showTakeButtonWhenAssigned',
+    errors: settings.getErrors('showTakeButtonWhenAssigned'),
+    on: settings.showTakeButtonWhenAssigned
 }) }}

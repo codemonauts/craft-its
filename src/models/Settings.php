@@ -20,4 +20,9 @@ class Settings extends Model
      * @var bool $useShortHumanDuration Whether to use the short human duration for the tables.
      */
     public bool $useShortHumanDuration = false;
+
+    /**
+     * @var bool $showTakeButtonWhenAssigned Whether to show the take button to quickly take an issue even if the issue is already assigned.
+     */
+    public bool $showTakeButtonWhenAssigned = false;
 }
