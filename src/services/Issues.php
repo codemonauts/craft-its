@@ -229,6 +229,7 @@ class Issues extends Component
 
         // Invalidate issue caches
         Craft::$app->getElements()->invalidateCachesForElementType(Issue::class);
+        Craft::$app->getCache()->delete('its:statuses:css');
     }
 
     public function deleteIssueTypeById(int $issueTypeId): bool

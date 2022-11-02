@@ -3,11 +3,13 @@
 namespace codemonauts\its;
 
 use codemonauts\its\elements\Issue;
+use codemonauts\its\fieldlayoutelements\CommentField;
 use codemonauts\its\fieldlayoutelements\ReporterField;
 use codemonauts\its\fieldlayoutelements\AssigneeField;
 use codemonauts\its\fieldlayoutelements\StatusField;
 use codemonauts\its\fieldlayoutelements\SubjectField;
 use codemonauts\its\models\Settings;
+use codemonauts\its\services\History;
 use codemonauts\its\services\Issues;
 use Craft;
 use craft\base\Plugin;
@@ -64,6 +66,7 @@ class IssueTrackingSystem extends Plugin
 
         $this->setComponents([
             'issues' => Issues::class,
+            'history' => History::class,
         ]);
 
         Event::on(Elements::class, Elements::EVENT_REGISTER_ELEMENT_TYPES, function (RegisterComponentTypesEvent $event) {
@@ -95,6 +98,7 @@ class IssueTrackingSystem extends Plugin
                 $event->fields[] = ReporterField::class;
                 $event->fields[] = AssigneeField::class;
                 $event->fields[] = StatusField::class;
+                $event->fields[] = CommentField::class;
             }
         });
 
@@ -179,5 +183,16 @@ class IssueTrackingSystem extends Plugin
     public function getIssues(): Issues
     {
         return $this->get('issues');
+    }
+
+    /**
+     * Returns the history component.
+     *
+     * @return History
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getHistory(): History
+    {
+        return $this->get('history');
     }
 }

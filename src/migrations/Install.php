@@ -49,7 +49,7 @@ class Install extends Migration
             'uid' => $this->uid(),
         ]);
 
-        $this->createIndex(null, '{{%its_issues}}', ['status']);
+        $this->createIndex(null, '{{%its_issues}}', ['state']);
         $this->createIndex(null, '{{%its_issues}}', ['typeId']);
         $this->createIndex(null, '{{%its_issues}}', ['assigneeId']);
         $this->createIndex(null, '{{%its_issues}}', ['reporterId']);

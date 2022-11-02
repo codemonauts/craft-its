@@ -8,6 +8,7 @@ use codemonauts\its\exceptions\IssueTypeNotFoundException;
 use codemonauts\its\IssueTrackingSystem;
 use codemonauts\its\models\IssueType;
 use codemonauts\its\records\Issue as IssueRecord;
+use codemonauts\its\services\History;
 use Craft;
 use craft\base\Element;
 use craft\elements\conditions\ElementConditionInterface;
@@ -599,7 +600,11 @@ class Issue extends Element
 
         $this->setDirtyAttributes($dirtyAttributes);
 
-        Craft::$app->getCache()->delete('its:statuses:css:' . $this->id);
+        $event = $this->firstSave ? History::EVENT_HISTORY_ISSUE_CREATED : History::EVENT_HISTORY_ISSUE_UPDATED;
+
+        if (!$this->getIsDraft() && $this->getIsCanonical()) {
+            IssueTrackingSystem::$plugin->getHistory()->addEvent($event, $this, Craft::$app->getUser()->getIdentity());
+        }
 
         parent::afterSave($isNew);
     }
