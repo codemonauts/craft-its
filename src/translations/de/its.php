@@ -34,4 +34,5 @@ return [
     'State' => '',
     'Use short human durations for date updated in tables.' => '',
     'Show "Take Issue" button in index tables even if the issue is assigned.' => '',
+    'The status of the issue.' => '',
 ];

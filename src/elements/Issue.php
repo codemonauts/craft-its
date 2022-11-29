@@ -13,12 +13,15 @@ use Craft;
 use craft\base\Element;
 use craft\elements\conditions\ElementConditionInterface;
 use craft\elements\User;
+use craft\fields\BaseRelationField;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
 use craft\helpers\DateTimeHelper;
 use craft\helpers\Html;
 use craft\helpers\UrlHelper;
 use craft\models\FieldLayout;
+use Diff\Differ\MapDiffer;
+use Diff\DiffOp\Diff\Diff;
 use yii\base\InvalidConfigException;
 
 class Issue extends Element
@@ -655,5 +658,74 @@ class Issue extends Element
     public static function createCondition(): ElementConditionInterface
     {
         return Craft::createObject(IssueCondition::class, [static::class]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function afterPropagate(bool $isNew): void
+    {
+        parent::afterPropagate($isNew);
+
+        // Save a new revision?
+        if ($this->shouldSaveRevision()) {
+            Craft::$app->getRevisions()->createRevision($this, $this->revisionCreatorId, $this->revisionNotes);
+        }
+    }
+
+    public function compareToLastRevision()
+    {
+        if (!$this->getIsCanonical()) {
+            return [];
+        }
+
+        $lastRevision = Issue::find()
+            ->revisionOf($this->id)
+            ->status(null)
+            ->orderBy(['num' => SORT_DESC])
+            ->one();
+
+        if (!$lastRevision) {
+            return [];
+        }
+
+        $fieldsToCompare = [
+            'subject',
+            'state',
+            'reporterId',
+            'assigneeId',
+        ];
+
+        $fieldsToCompare += array_keys($this->getFieldValues());
+        $oldData = $lastRevision->toArray($fieldsToCompare, [], false);
+        $newData = $this->toArray($fieldsToCompare, [], false);
+
+        foreach ($this->getFieldLayout()->getCustomFields() as $field) {
+            if ($field instanceof BaseRelationField) {
+                $handle = $field->handle;
+                $oldData[$field->handle] = $lastRevision->$handle->ids();
+                $newData[$field->handle] = $this->$handle->ids();
+            }
+        }
+
+        $differ = new MapDiffer(true);
+        $diff = $differ->doDiff($oldData, $newData);
+
+        print_r($this->convertDiffToArray($diff));die;
+    }
+
+    private function convertDiffToArray(array $array)
+    {
+        $newArray = [];
+
+        foreach ($array as $attribute => $value) {
+            if ($value instanceof Diff) {
+                $newArray[$attribute] = $this->convertDiffToArray($value->getOperations());
+            } else {
+                $newArray[$attribute] = $value->toArray();
+            }
+        }
+
+        return $newArray;
     }
 }
