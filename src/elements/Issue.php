@@ -12,13 +12,16 @@ use codemonauts\its\services\History;
 use Craft;
 use craft\base\Element;
 use craft\elements\conditions\ElementConditionInterface;
+use craft\elements\db\AssetQuery;
+use craft\elements\db\EntryQuery;
 use craft\elements\User;
-use craft\fields\BaseRelationField;
+use craft\fields\BaseOptionsField;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
 use craft\helpers\DateTimeHelper;
 use craft\helpers\Html;
 use craft\helpers\UrlHelper;
+use craft\htmlfield\HtmlField;
 use craft\models\FieldLayout;
 use Diff\Differ\MapDiffer;
 use Diff\DiffOp\Diff\Diff;
@@ -695,29 +698,43 @@ class Issue extends Element
             return [];
         }
 
-        $fieldsToCompare = [
+        $oldData = $lastRevision->getIssueValues();
+        $newData = $this->getIssueValues();
+
+        $differ = new MapDiffer(true);
+        $diff = $differ->doDiff($oldData, $newData);
+
+        return $this->convertDiffToArray($diff);
+    }
+
+
+    private function getIssueValues()
+    {
+        $attributesToDiff = [
             'subject',
             'state',
             'reporterId',
             'assigneeId',
         ];
 
-        $fieldsToCompare += array_keys($this->getFieldValues());
-        $oldData = $lastRevision->toArray($fieldsToCompare, [], false);
-        $newData = $this->toArray($fieldsToCompare, [], false);
+        $values = $this->getAttributes($attributesToDiff);
 
         foreach ($this->getFieldLayout()?->getCustomFields() as $field) {
-            if ($field instanceof BaseRelationField) {
-                $handle = $field->handle;
-                $oldData[$field->handle] = $lastRevision->$handle->ids();
-                $newData[$field->handle] = $this->$handle->ids();
+            $handle = $field->handle;
+            if ($field::valueType() === EntryQuery::class) {
+                $values[$field->handle] = $this->$handle->ids();
+            } elseif ($field::valueType() === AssetQuery::class) {
+                $values[$field->handle] = $this->$handle->ids();
+            } elseif ($field instanceof BaseOptionsField) {
+                $values[$field->handle] = $this->getFieldValue($handle)->value;
+            } elseif ($field instanceof HtmlField) {
+                $values[$field->handle] = (string)$this->getFieldValue($handle);
+            } else {
+                $values[$field->handle] = $this->getFieldValue($handle);
             }
         }
 
-        $differ = new MapDiffer(true);
-        $diff = $differ->doDiff($oldData, $newData);
-
-        return $this->convertDiffToArray($diff);
+        return $values;
     }
 
     /**
