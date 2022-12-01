@@ -673,6 +673,12 @@ class Issue extends Element
         }
     }
 
+    /**
+     * Compares the current values to the last saved revision and return the diffs.
+     *
+     * @return array
+     * @throws \Exception
+     */
     public function compareToLastRevision()
     {
         if (!$this->getIsCanonical()) {
@@ -700,7 +706,7 @@ class Issue extends Element
         $oldData = $lastRevision->toArray($fieldsToCompare, [], false);
         $newData = $this->toArray($fieldsToCompare, [], false);
 
-        foreach ($this->getFieldLayout()->getCustomFields() as $field) {
+        foreach ($this->getFieldLayout()?->getCustomFields() as $field) {
             if ($field instanceof BaseRelationField) {
                 $handle = $field->handle;
                 $oldData[$field->handle] = $lastRevision->$handle->ids();
@@ -711,21 +717,28 @@ class Issue extends Element
         $differ = new MapDiffer(true);
         $diff = $differ->doDiff($oldData, $newData);
 
-        print_r($this->convertDiffToArray($diff));die;
+        return $this->convertDiffToArray($diff);
     }
 
-    private function convertDiffToArray(array $array)
+    /**
+     * Converts an diff array to an simple array.
+     *
+     * @param array $array
+     *
+     * @return array
+     */
+    private function convertDiffToArray(array $diff)
     {
-        $newArray = [];
+        $result = [];
 
-        foreach ($array as $attribute => $value) {
+        foreach ($diff as $attribute => $value) {
             if ($value instanceof Diff) {
-                $newArray[$attribute] = $this->convertDiffToArray($value->getOperations());
+                $result[$attribute] = $this->convertDiffToArray($value->getOperations());
             } else {
-                $newArray[$attribute] = $value->toArray();
+                $result[$attribute] = $value->toArray();
             }
         }
 
-        return $newArray;
+        return $result;
     }
 }
