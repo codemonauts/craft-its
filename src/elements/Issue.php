@@ -406,6 +406,7 @@ class Issue extends Element
             'dateCreated' => Craft::t('its', 'Date Created'),
             'dateUpdated' => Craft::t('its', 'Date Updated'),
             'durationUpdated' => Craft::t('its', 'Last Update'),
+            'age' => Craft::t('its', 'Age'),
             'state' => Craft::t('its', 'State'),
         ];
     }
@@ -421,6 +422,7 @@ class Issue extends Element
             'assignee',
             'dateCreated',
             'durationUpdated',
+            'age',
         ];
     }
 
@@ -484,6 +486,10 @@ class Issue extends Element
 
             case 'durationUpdated':
                 $diff = $this->dateUpdated?->diff(DateTimeHelper::now());
+                return IssueTrackingSystem::$settings->useShortHumanDuration ? \codemonauts\its\helpers\DateTimeHelper::shortHumanDuration($diff) : DateTimeHelper::humanDuration($diff);
+
+            case 'age':
+                $diff = $this->dateCreated?->diff(DateTimeHelper::now());
                 return IssueTrackingSystem::$settings->useShortHumanDuration ? \codemonauts\its\helpers\DateTimeHelper::shortHumanDuration($diff) : DateTimeHelper::humanDuration($diff);
 
             case 'state':

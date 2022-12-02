@@ -31,6 +31,7 @@ return [
     'Reporter' => '',
     'Assignee' => '',
     'Last Update' => '',
+    'Age' => '',
     'State' => '',
     'Use short human durations for date updated in tables.' => '',
     'Show "Take Issue" button in index tables even if the issue is assigned.' => '',
